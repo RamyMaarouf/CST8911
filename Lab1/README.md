@@ -1,6 +1,6 @@
 **Lab#1: Storage, CST8911, Ramy Maarouf, 041-269-337**
 
-<img width="1437" height="722" alt="Step 1" src="https://github.com/user-attachments/assets/14df8d74-dd7d-4faa-9dc7-66e5b49f03a9" />
+<img width="1437" height="722" alt="Step 1" src="https://github.com/user-attachments/assets/14df8d74-dd7d-4faa-9dc7-66e5b49f03a9" />/
 
 <img width="1438" height="432" alt="Step 2" src="https://github.com/user-attachments/assets/9b104853-a1dd-4296-b978-291888f1582c" />
 
