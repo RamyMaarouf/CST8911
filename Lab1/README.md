@@ -10,7 +10,7 @@
 
 <img src="./Step 4-2.png" style="width:6.5in;height:3.21875in" />
 
-<img src="./Step 5-1.png" style="width:6.5in;height:3.21875in" />
+<img src="Step 1.png" style="width:6.5in;height:3.21875in" />
 
 <img src="./Step 5-2.png" style="width:6.5in;height:3.21875in" />
 
