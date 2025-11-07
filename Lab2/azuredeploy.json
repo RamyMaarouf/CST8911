@@ -1,0 +1,184 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 \{\
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",\
+  "contentVersion": "1.0.0.0",\
+  "parameters": \{\
+    "vmName": \{\
+      "type": "string",\
+      "defaultValue": "arm-linux-vm",\
+      "metadata": \{\
+        "description": "The name of the Virtual Machine."\
+      \}\
+    \},\
+    "vmUsername": \{\
+      "type": "string",\
+      "defaultValue": "labuser",\
+      "metadata": \{\
+        "description": "Username for the Virtual Machine."\
+      \}\
+    \},\
+    "vmPassword": \{\
+      "type": "securestring",\
+      "metadata": \{\
+        "description": "Password for the Virtual Machine."\
+      \}\
+    \},\
+    "location": \{\
+      "type": "string",\
+      "defaultValue": "canadacentral", \
+      "metadata": \{\
+        "description": "Region for all resources. Must be an allowed region for your subscription."\
+      \}\
+    \},\
+    "tagValue": \{\
+      "type": "string",\
+      "defaultValue": "deployment",\
+      "metadata": \{\
+        "description": "Value for the 'Environment' tag."\
+      \}\
+    \}\
+  \},\
+  "variables": \{\
+    "vnetName": "[concat(parameters('vmName'), '-vnet')]",\
+    "subnetName": "default",\
+    "publicIpName": "[concat(parameters('vmName'), '-ip')]",\
+    "nicName": "[concat(parameters('vmName'), '-nic')]",\
+    "osDiskName": "[concat(parameters('vmName'), '-osdisk')]"\
+  \},\
+  "resources": [\
+    \{\
+      "type": "Microsoft.Network/virtualNetworks",\
+      "apiVersion": "2020-11-01",\
+      "name": "[variables('vnetName')]",\
+      "location": "[parameters('location')]",\
+      "properties": \{\
+        "addressSpace": \{\
+          "addressPrefixes": [ "10.0.0.0/16" ]\
+        \},\
+        "subnets": [\
+          \{\
+            "name": "[variables('subnetName')]",\
+            "properties": \{\
+              "addressPrefix": "10.0.0.0/24"\
+            \}\
+          \}\
+        ]\
+      \},\
+      "tags": \{\
+        "Environment": "[parameters('tagValue')]"\
+      \}\
+    \},\
+    \{\
+      "type": "Microsoft.Network/publicIPAddresses",\
+      "apiVersion": "2020-11-01",\
+      "name": "[variables('publicIpName')]",\
+      "location": "[parameters('location')]",\
+      "properties": \{\
+        "publicIPAllocationMethod": "Static",\
+        "publicIPAddressVersion": "IPv4"\
+      \},\
+      "sku": \{\
+        "name": "Standard" \
+      \},\
+      "tags": \{\
+        "Environment": "[parameters('tagValue')]"\
+      \}\
+    \},\
+    \{\
+      "type": "Microsoft.Network/networkInterfaces",\
+      "apiVersion": "2020-11-01",\
+      "name": "[variables('nicName')]",\
+      "location": "[parameters('location')]",\
+      "dependsOn": [\
+        "[resourceId('Microsoft.Network/virtualNetworks/', variables('vnetName'))]",\
+        "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIpName'))]"\
+      ],\
+      "properties": \{\
+        "ipConfigurations": [\
+          \{\
+            "name": "ipconfig1",\
+            "properties": \{\
+              "privateIPAllocationMethod": "Dynamic",\
+              "publicIPAddress": \{\
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))]"\
+              \},\
+              "subnet": \{\
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"\
+              \}\
+            \}\
+          \}\
+        ],\
+        "enableAcceleratedNetworking": false,\
+        "networkSecurityGroup": null\
+      \},\
+      "tags": \{\
+        "Environment": "[parameters('tagValue')]"\
+      \}\
+    \},\
+    \{\
+      "type": "Microsoft.Compute/virtualMachines",\
+      "apiVersion": "2020-12-01",\
+      "name": "[parameters('vmName')]",\
+      "location": "[parameters('location')]",\
+      "dependsOn": [\
+        "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"\
+      ],\
+      "properties": \{\
+        "hardwareProfile": \{\
+          "vmSize": "Standard_B1ls"\
+        \},\
+        "storageProfile": \{\
+          "imageReference": \{\
+            "publisher": "Canonical",\
+            "offer": "0001-com-ubuntu-server-jammy",\
+            "sku": "22_04-lts-gen2",\
+            "version": "latest"\
+          \},\
+          "osDisk": \{\
+            "name": "[variables('osDiskName')]",\
+            "caching": "ReadWrite",\
+            "createOption": "FromImage",\
+            "managedDisk": \{\
+              "storageAccountType": "StandardSSD_LRS"\
+            \}\
+          \}\
+        \},\
+        "osProfile": \{\
+          "computerName": "[parameters('vmName')]",\
+          "adminUsername": "[parameters('vmUsername')]",\
+          "adminPassword": "[parameters('vmPassword')]",\
+          "linuxConfiguration": \{\
+            "disablePasswordAuthentication": false,\
+            "ssh": \{\
+              "publicKeys": []\
+            \},\
+            "provisionVMAgent": true\
+          \}\
+        \},\
+        "networkProfile": \{\
+          "networkInterfaces": [\
+            \{\
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"\
+            \}\
+          ]\
+        \},\
+        "diagnosticsProfile": \{\
+          "bootDiagnostics": \{\
+            "enabled": true\
+          \}\
+        \},\
+        "availabilitySet": null,\
+        "proximityPlacementGroup": null\
+      \},\
+      "tags": \{\
+        "Environment": "[parameters('tagValue')]"\
+      \}\
+    \}\
+  ]\
+\}}
